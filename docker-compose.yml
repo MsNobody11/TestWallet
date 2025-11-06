@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-test_wallet}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: spring_app
+    environment:
+      # Application settings
+      - APP_API_PREFIX=${APP_API_PREFIX:-/api/v1}
+      - SERVER_PORT=${SERVER_PORT:-8085}
+      - SERVER_CONTEXT_PATH=${SERVER_CONTEXT_PATH:-/}
+
+      # Database connection
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-test_wallet}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+
+      # JPA & Hibernate
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO:-validate}
+      - JPA_SHOW_SQL=${JPA_SHOW_SQL:-true}
+      - HIBERNATE_FORMAT_SQL=${HIBERNATE_FORMAT_SQL:-true}
+
+      # Liquibase
+      - LIQUIBASE_ENABLED=${LIQUIBASE_ENABLED:-true}
+
+      # Logging
+      - LOG_LEVEL_HIBERNATE_SQL=${LOG_LEVEL_HIBERNATE_SQL:-DEBUG}
+      - LOG_LEVEL_HIBERNATE_BINDER=${LOG_LEVEL_HIBERNATE_BINDER:-TRACE}
+      - LOG_LEVEL_LIQUIBASE=${LOG_LEVEL_LIQUIBASE:-INFO}
+      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-DEBUG}
+    ports:
+      - "${APP_PORT:-8088}:${SERVER_PORT:-8085}"
+    depends_on:
+      - db
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

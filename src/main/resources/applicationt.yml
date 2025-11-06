@@ -1,0 +1,40 @@
+app:
+  api:
+    prefix: ${APP_API_PREFIX:/api/v1}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/test_wallet}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLED:true}
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: public
+
+  sql:
+    init:
+      platform: postgresql
+
+server:
+  port: ${SERVER_PORT:8085}
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH:/}
+
+logging:
+  level:
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:DEBUG}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_HIBERNATE_BINDER:TRACE}
+    liquibase: ${LOG_LEVEL_LIQUIBASE:INFO}
+    com.example.testwallet: ${LOG_LEVEL_APP:DEBUG}
